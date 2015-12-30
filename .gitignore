@@ -1,0 +1,5 @@
+doc
+uisrc
+bin
+*.zip
+*.pyc

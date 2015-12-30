@@ -1,0 +1,5 @@
+image
+dist
+build
+*.spec
+*.pyc

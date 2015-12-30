@@ -1,0 +1,1 @@
+pyinstaller -i icon.ico -n PixivHelper -w gui.py && copy icon.ico dist\PixivHelper\ && copy help.txt dist\PixivHelper\
