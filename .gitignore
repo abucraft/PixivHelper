@@ -4,3 +4,4 @@ bin
 *.zip
 *.pyc
 source/log.txt
+settings.json
