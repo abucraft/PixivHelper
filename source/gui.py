@@ -2,6 +2,8 @@
 import wx
 import os
 import thread
+import sys
+import win32com.client
 from manager import Manager
 from datetime import time
 from datetime import datetime
@@ -1024,7 +1026,18 @@ def check_runnable():
     if not manager.settings["runnable"]:
         on_show_window(None)
 
+
+
 app = wx.App(False)
+
+process_name = sys.argv[0]
+print process_name
+WMI = win32com.client.GetObject('winmgmts:')
+processCodeCov = WMI.ExecQuery('select * from Win32_Process where Name="%s"' % process_name)
+if len(processCodeCov) > 0:
+    wx.MessageBox(u"程序已在运行",u"提示",wx.OK|wx.ICON_INFORMATION)
+    exit(0)
+
 manager = Manager()
 task_bar_ico = TaskBarIcon()
 check_runnable()

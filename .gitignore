@@ -3,3 +3,4 @@ uisrc
 bin
 *.zip
 *.pyc
+source/log.txt
