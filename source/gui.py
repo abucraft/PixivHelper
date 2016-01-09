@@ -988,7 +988,7 @@ class TaskBarIcon(wx.TaskBarIcon):
 
     def begin_work(self):
         self.task_timer.Start(manager.settings["time_setting"]["span_mili_second"])
-        print "begin work"
+        print "begin working"
         self.begin_working = True
         self.task_timer.Notify()
 
@@ -1000,12 +1000,12 @@ class TaskBarIcon(wx.TaskBarIcon):
         if cur_time > begin_time and cur_time < end_time:
             if not self.begin_working:
                 self.task_timer.Start(manager.settings["time_setting"]["span_mili_second"])
-                print "begin work"
+                print "begin daily work"
                 self.begin_working = True
         else:
             if self.begin_working:
                 self.task_timer.Stop()
-                print "end work"
+                print "end daily work"
                 self.begin_working = False
 
     def CreatePopupMenu(self):

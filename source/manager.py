@@ -9,10 +9,12 @@ import json
 import logging
 import sys
 import _winreg
+
+exepath,exename = os.path.split(sys.argv[0])
 logging.basicConfig(level=logging.DEBUG,
                 format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                 datefmt='%a, %d %b %Y %H:%M:%S',
-                filename='log.txt',
+                filename=os.path.join(exepath,"log.txt"),
                 filemode='w')
 def get_path_size(str_path):
     if not os.path.exists(str_path):
@@ -22,8 +24,8 @@ def get_path_size(str_path):
     total_size = 0
     for str_root, ls_dirs, ls_files in os.walk(str_path):
         #get child directory size
-        for str_dir in ls_dirs:
-            total_size = total_size + get_path_size(os.path.join(str_root, str_dir));
+        #for str_dir in ls_dirs:
+        #    total_size = total_size + get_path_size(os.path.join(str_root, str_dir));
 
         #for child file size
         for str_file in ls_files:
@@ -227,17 +229,17 @@ class Manager:
     }
     is_working = False
     def load_setting(self):
-        if not os.path.exists("settings.json"):
-            self.settings["disk_setting"]["root_dir"] = os.path.join(os.getcwd(),"image")
+        if not os.path.exists(os.path.join(exepath,"settings.json")):
+            self.settings["disk_setting"]["root_dir"] = os.path.join(os.getcwd(),exepath,"image")
             self.worker.root_dir = self.settings["disk_setting"]["root_dir"]
             try:
                 key = _winreg.OpenKey(_winreg.HKEY_CURRENT_USER,"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",0,_winreg.KEY_WRITE)
-                _winreg.SetValueEx(key,"PixivHelper",0,os.path.join(os.getcwd(),_winreg.REG_SZ,sys.argv[0]))
-                file("settings.json","w").write(json.dumps(self.settings))
+                _winreg.SetValueEx(key,"PixivHelper",0,os.path.join(exepath,_winreg.REG_SZ,sys.argv[0]))
+                file(os.path.join(exepath,"settings.json"),"w").write(json.dumps(self.settings))
             except Exception as e:
                 print e
         else:
-            self.settings = json.load(file("settings.json","r"))
+            self.settings = json.load(file(os.path.join(exepath,"settings.json"),"r"))
             self.worker.root_dir = self.settings["disk_setting"]["root_dir"]
             try:
                 if self.settings["auto_boot"]:
@@ -252,11 +254,12 @@ class Manager:
     def __init__(self):
         self.load_setting()
         self.cur_size = get_path_size(self.settings["disk_setting"]["root_dir"])
+        print "目录大小为 : %d" % self.cur_size
 
     def apply_settings(self):
         if not self.settings["runnable"]:
             self.settings["runnable"] = True
-        file("settings.json","w").write(json.dumps(self.settings))
+        file(os.path.join(exepath,"settings.json"),"w").write(json.dumps(self.settings))
         self.worker.root_dir = self.settings["disk_setting"]["root_dir"]
         try:
             if self.settings["auto_boot"]:
@@ -271,7 +274,7 @@ class Manager:
     def crawl(self):
         self.worker.size = self.settings["image_size"]
         if self.cur_size > self.settings["disk_setting"]["max_size"]:
-            logging.info("total images size out of range")
+            logging.info("total images size out of range %d" % self.cur_size)
         else:
             if self.settings["crawl_setting"]["following"]["todo"]:
                 self.worker.pull_following_works(datetime.strptime(self.settings["last_crawl_time"],"%Y-%m-%d %H:%M:%S"),
@@ -286,7 +289,7 @@ class Manager:
             self.cur_size += self.worker.writes
             self.worker.writes = 0
             self.settings["last_crawl_time"] = self.worker.latest_time
-            file("settings.json","w").write(json.dumps(self.settings))
+            file(os.path.join(exepath,"settings.json"),"w").write(json.dumps(self.settings))
 
     def work(self):
         if self.is_working:
@@ -309,3 +312,5 @@ class Manager:
 
     def test(self):
         self.work()
+
+#C:\Users\ok\AppData\Local\VirtualStore\Windows\SysWOW64u

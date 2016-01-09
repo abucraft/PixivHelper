@@ -34,12 +34,19 @@ class Worker:
         self.check_root_dir(["following"])
         curpg = 1
         per_pg = 30
+        if cmp(result["status"],"success") != 0:
+            file(os.path.join(self.root_dir,"following","error.json"),"w").write(json.dumps(result))
+            return
+        file(os.path.join(self.root_dir,"following","metadata.json"),"w").write(json.dumps(result))
         total = result["pagination"]["total"]
         nums = (nums < total and [nums] or [total])[0]
         for i in range(0,nums):
             if curpg < i/per_pg + 1:
                 curpg+=1
                 result = self.api.me_following_works(page=curpg)
+                if cmp(result["status"],"success") != 0:
+                    file(os.path.join(self.root_dir,"following","error.json"),"w").write(json.dumps(result))
+                    return
             idx = i%per_pg
             info_json = result["response"][idx]
             reup_time = info_json["reuploaded_time"]
@@ -65,6 +72,9 @@ class Worker:
         result = self.api.ranking(ranking_type = work_type,mode = rank_type)
         curpg = 1
         per_pg = 50
+        if cmp(result["status"],"success") != 0:
+            file(os.path.join(self.root_dir,work_type,rank_type,"error.json"),"w").write(json.dumps(result))
+            return
         file(os.path.join(self.root_dir,work_type,rank_type,"metadata.json"),"w").write(json.dumps(result))
         total = result["pagination"]["total"]
         nums = (nums < total and [nums] or [total])[0]
@@ -72,6 +82,10 @@ class Worker:
             if curpg < i/per_pg + 1:
                 curpg+=1
                 result = self.api.me_following_works(page=curpg,ranking_type=rank_type,mode = work_type)
+                if cmp(result["status"],"success") != 0:
+                    file(os.path.join(self.root_dir,work_type,rank_type,"error.json"),"w").write(json.dumps(result))
+                    return
+                file(os.path.join(self.root_dir,work_type,rank_type,"metadata.json"),"w").write(json.dumps(result))
             idx = i%per_pg
             info_json = result["response"][0]["works"][idx]["work"]
             reup_time = info_json["reuploaded_time"]
@@ -106,7 +120,7 @@ class Worker:
             break
         file_name = first_url[first_url.rfind("/")+1:]
         if os.path.exists(os.path.join(path,file_name)):
-            print u"文件已存在:跳过"
+            #print u"文件已存在:跳过"
             return first_url
         file(os.path.join(path,"%s.json" % (file_name)),"w").write(json.dumps(full_info))
         res = self.api.auth_requests_call("GET",first_url)
@@ -139,7 +153,7 @@ class Worker:
             img_url = "%s_p%d%s" % (origin_url[:p_idx],i,origin_url[r_idx:])
             file_name = img_url[img_url.rfind("/")+1:]
             if os.path.exists(os.path.join(cur_path,file_name)):
-                print u"文件已存在:跳过"
+                #print u"文件已存在:跳过"
                 continue
             res = self.api.auth_requests_call("GET",img_url)
             data = res.content
@@ -147,22 +161,3 @@ class Worker:
             self.writes += int(res.headers["content-length"])
             print os.path.join(cur_path,file_name)
             print res.headers["content-length"]
-
-'''
-#for test
-work = Worker()
-try:
-    work.login("pl78901","4560123")
-except PixivError as perror:
-    print perror
-    exit(0)
-#works = work.pull_following_works(datetime.now())
-works = work.pull_ranking_works(datetime.now())
-f=open("token","w")
-f.write(json.dumps(work.token))
-f.close()
-
-f = open("daily_ranking","w")
-f.write(json.dumps(works))
-f.close()
-'''
