@@ -24,6 +24,11 @@ class Worker:
             if not os.path.exists(cur_path):
                 os.mkdir(cur_path)
 
+    def check_result(self,result,filepath):
+        if cmp(result["status"],"success") != 0:
+            file(filepath,"w").write(json.dumps(result))
+            raise PixivError(json.dumps(result))
+
     def pull_following_works(self,time,nums=10,
         flt={
         'illustration':True,
@@ -34,9 +39,7 @@ class Worker:
         self.check_root_dir(["following"])
         curpg = 1
         per_pg = 30
-        if cmp(result["status"],"success") != 0:
-            file(os.path.join(self.root_dir,"following","error.json"),"w").write(json.dumps(result))
-            return
+        self.check_result(result,os.path.join(self.root_dir,"following","error.json"))
         file(os.path.join(self.root_dir,"following","metadata.json"),"w").write(json.dumps(result))
         total = result["pagination"]["total"]
         nums = (nums < total and [nums] or [total])[0]
@@ -44,9 +47,8 @@ class Worker:
             if curpg < i/per_pg + 1:
                 curpg+=1
                 result = self.api.me_following_works(page=curpg)
-                if cmp(result["status"],"success") != 0:
-                    file(os.path.join(self.root_dir,"following","error.json"),"w").write(json.dumps(result))
-                    return
+                self.check_result(result,os.path.join(self.root_dir,"following","error.json"))
+
             idx = i%per_pg
             info_json = result["response"][idx]
             reup_time = info_json["reuploaded_time"]
@@ -72,9 +74,9 @@ class Worker:
         result = self.api.ranking(ranking_type = work_type,mode = rank_type)
         curpg = 1
         per_pg = 50
-        if cmp(result["status"],"success") != 0:
-            file(os.path.join(self.root_dir,work_type,rank_type,"error.json"),"w").write(json.dumps(result))
-            return
+
+        self.check_result(result,os.path.join(self.root_dir,work_type,rank_type,"error.json"))
+
         file(os.path.join(self.root_dir,work_type,rank_type,"metadata.json"),"w").write(json.dumps(result))
         total = result["pagination"]["total"]
         nums = (nums < total and [nums] or [total])[0]
@@ -82,9 +84,8 @@ class Worker:
             if curpg < i/per_pg + 1:
                 curpg+=1
                 result = self.api.me_following_works(page=curpg,ranking_type=rank_type,mode = work_type)
-                if cmp(result["status"],"success") != 0:
-                    file(os.path.join(self.root_dir,work_type,rank_type,"error.json"),"w").write(json.dumps(result))
-                    return
+                self.check_result(result,os.path.join(self.root_dir,work_type,rank_type,"error.json"))
+
                 file(os.path.join(self.root_dir,work_type,rank_type,"metadata.json"),"w").write(json.dumps(result))
             idx = i%per_pg
             info_json = result["response"][0]["works"][idx]["work"]
