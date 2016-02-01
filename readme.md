@@ -11,5 +11,5 @@ windows
 ##依赖
 pixivpy, wxpython
 
-##截图
-[!screenshot](screenshot1.png)
+##截图  
+[!screenshot1](screenshot1.png)  
