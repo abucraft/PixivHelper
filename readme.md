@@ -1,4 +1,4 @@
-#Pixiv Helper  
+#Pixiv Helper   
 ##描述  
 
 一个含gui的p站每日抓图小工具。  
@@ -6,10 +6,10 @@
 使用pyinstaller生成的可执行程序在release分支。  
 
 ##操作系统  
-windows
+windows  
 
-##依赖
-pixivpy, wxpython
+##依赖  
+pixivpy, wxpython  
 
 ##截图  
-[!screenshot1](screenshot1.png)  
+[!screenshot1](screenshot1.png)
