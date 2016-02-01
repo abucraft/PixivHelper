@@ -12,4 +12,4 @@ windows
 pixivpy, wxpython
 
 ##截图
-[!screenshot](screenshot.png)
+[!screenshot](screenshot1.png)
